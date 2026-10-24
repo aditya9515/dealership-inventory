@@ -19,11 +19,18 @@ describe('authentication against a real SQLite file', () => {
     db = openDatabase(join(dir, 'test.db'));
     app = createApp({ db, jwtSecret: secret, authRateLimit: 100 });
   });
-  afterEach(() => { db.close(); rmSync(dir, { recursive: true, force: true }); });
+  afterEach(() => {
+    db.close();
+    rmSync(dir, { recursive: true, force: true });
+  });
 
   it('registers a customer, hashes the password, and issues a usable JWT', async () => {
     const result = await request(app).post('/api/auth/register').send(credentials).expect(201);
-    expect(result.body.user).toMatchObject({ name: 'Asha Rao', role: 'customer', email: credentials.email });
+    expect(result.body.user).toMatchObject({
+      name: 'Asha Rao',
+      role: 'customer',
+      email: credentials.email,
+    });
     expect(result.body.user).not.toHaveProperty('password_hash');
     expect(jwt.verify(result.body.token, secret)).toMatchObject({ sub: result.body.user.id });
     const stored = db.prepare('SELECT password_hash FROM users').get()!;
@@ -33,20 +40,36 @@ describe('authentication against a real SQLite file', () => {
 
   it('normalizes emails and rejects duplicate registration', async () => {
     await request(app).post('/api/auth/register').send(credentials).expect(201);
-    await request(app).post('/api/auth/register').send({ ...credentials, email: ' ASHA@example.com ' }).expect(409);
+    await request(app)
+      .post('/api/auth/register')
+      .send({ ...credentials, email: ' ASHA@example.com ' })
+      .expect(409);
   });
 
-  it.each([
-    { email: 'invalid' }, { name: '' }, { password: 'short' }, { role: 'admin' },
-  ])('rejects invalid or privilege-escalating registration: %j', async (change) => {
-    await request(app).post('/api/auth/register').send({ ...credentials, ...change }).expect(400);
-  });
+  it.each([{ email: 'invalid' }, { name: '' }, { password: 'short' }, { role: 'admin' }])(
+    'rejects invalid or privilege-escalating registration: %j',
+    async (change) => {
+      await request(app)
+        .post('/api/auth/register')
+        .send({ ...credentials, ...change })
+        .expect(400);
+    },
+  );
 
   it('logs in with a correct password, but rejects a wrong password or missing account', async () => {
     await request(app).post('/api/auth/register').send(credentials);
-    await request(app).post('/api/auth/login').send({ email: credentials.email, password: credentials.password }).expect(200);
-    const wrong = await request(app).post('/api/auth/login').send({ email: credentials.email, password: 'Incorrect123!' }).expect(401);
-    const missing = await request(app).post('/api/auth/login').send({ email: 'missing@example.com', password: credentials.password }).expect(401);
+    await request(app)
+      .post('/api/auth/login')
+      .send({ email: credentials.email, password: credentials.password })
+      .expect(200);
+    const wrong = await request(app)
+      .post('/api/auth/login')
+      .send({ email: credentials.email, password: 'Incorrect123!' })
+      .expect(401);
+    const missing = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'missing@example.com', password: credentials.password })
+      .expect(401);
     expect(wrong.body.error.message).toBe(missing.body.error.message);
   });
 
@@ -64,12 +87,20 @@ describe('authentication against a real SQLite file', () => {
 
   it('limits repeated authentication attempts', async () => {
     const limited = createApp({ db, jwtSecret: secret, authRateLimit: 2 });
-    for (let i = 0; i < 2; i++) await request(limited).post('/api/auth/login').send({ email: 'x@example.com', password: 'wrong' }).expect(401);
+    for (let i = 0; i < 2; i++)
+      await request(limited)
+        .post('/api/auth/login')
+        .send({ email: 'x@example.com', password: 'wrong' })
+        .expect(401);
     await request(limited).post('/api/auth/login').send({}).expect(429);
   });
 
   it('returns JSON for malformed input and unknown API routes', async () => {
-    await request(app).post('/api/auth/login').set('Content-Type', 'application/json').send('{').expect(400);
+    await request(app)
+      .post('/api/auth/login')
+      .set('Content-Type', 'application/json')
+      .send('{')
+      .expect(400);
     const result = await request(app).get('/api/unknown').expect(404);
     expect(result.body.error.code).toBe('NOT_FOUND');
     expect(result.headers['x-request-id']).toBeTruthy();
@@ -80,6 +111,9 @@ describe('authentication against a real SQLite file', () => {
     db.close();
     db = openDatabase(join(dir, 'test.db'));
     app = createApp({ db, jwtSecret: secret });
-    await request(app).post('/api/auth/login').send({ email: credentials.email, password: credentials.password }).expect(200);
+    await request(app)
+      .post('/api/auth/login')
+      .send({ email: credentials.email, password: credentials.password })
+      .expect(200);
   });
 });

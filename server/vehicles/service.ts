@@ -5,9 +5,16 @@ import { VehicleRepository } from './repository.js';
 import type { VehicleDetails, VehicleInput, VehicleQuery } from './validation.js';
 
 export class VehicleService {
-  constructor(private db: DatabaseSync, private repository: VehicleRepository) {}
-  list(query: VehicleQuery) { return this.repository.list(query); }
-  history() { return this.repository.history(); }
+  constructor(
+    private db: DatabaseSync,
+    private repository: VehicleRepository,
+  ) {}
+  list(query: VehicleQuery) {
+    return this.repository.list(query);
+  }
+  history() {
+    return this.repository.history();
+  }
 
   create(input: VehicleInput, actorId: string) {
     return transaction(this.db, () => {
@@ -33,7 +40,13 @@ export class VehicleService {
       const vehicle = this.repository.changeStock(id, delta);
       if (!vehicle) {
         if (!this.repository.find(id)) throw new AppError(404, 'NOT_FOUND', 'Vehicle not found.');
-        throw new AppError(409, 'STOCK_CONFLICT', kind === 'purchase' ? 'Not enough vehicles in stock.' : 'Stock cannot exceed 1,000,000 units.');
+        throw new AppError(
+          409,
+          'STOCK_CONFLICT',
+          kind === 'purchase'
+            ? 'Not enough vehicles in stock.'
+            : 'Stock cannot exceed 1,000,000 units.',
+        );
       }
       this.repository.record(vehicle, actorId, kind, delta);
       return vehicle;
