@@ -136,3 +136,54 @@ All five browser tests now pass, including the full admin workflow. The screensh
 Review found one password edge case: bcrypt truncates after 72 bytes, so a long Unicode login password could be accepted after truncation. I’ve added a failing regression test and will fix it before publishing.
 
 ````
+
+## assistant — 2026-10-24T20:23:12.693Z
+
+````text
+Final checks pass: 49 API/config tests, five browser tests, 99.17% backend line coverage, and a production HTTP smoke check.
+
+The public repository is created. I’m uploading the recorded commit sequence, screenshots, documentation, test report, and chat log.
+
+````
+
+## assistant — 2026-10-24T20:28:09.619Z
+
+````text
+The project is published and matches the verified local files. The submission form also needs your address, phone number, academic details, personal answers, and resume. I’ll place the repository link in its assessment field for you to finish reviewing and submitting.
+
+````
+
+## user — 2026-10-24T20:43:54.089Z
+
+````text
+deploy and run
+
+````
+
+## assistant — 2026-10-24T20:43:57.243Z
+
+````text
+I’ll check the current app and available hosting options, then deploy it and verify the public URL.
+
+````
+
+## assistant — 2026-10-24T20:44:52.019Z
+
+````text
+The app is still running locally. I’m using the Sites and plugin-management skills to check deployment options. This version needs a Node server and persistent database storage; I’m checking for a hosting connection that supports both.
+
+````
+
+## assistant — 2026-10-24T20:46:47.151Z
+
+````text
+Railway supports this app’s database storage, but it isn’t connected to your account here. Add and connect Railway so I can finish the deployment. I’ll prepare the hosting configuration while you do that.
+
+````
+
+## assistant — 2026-10-24T20:48:15.170Z
+
+````text
+I’m preparing a persistent SQLite volume, a startup command that loads the demo accounts, and a health check. I also found that Railway forwards client IPs differently from a direct local connection, so I’m adjusting the login rate limiter to handle that correctly.
+
+````

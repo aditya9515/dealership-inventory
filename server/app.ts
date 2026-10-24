@@ -1,8 +1,9 @@
 import express from 'express';
 import type { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
+import { isIP } from 'node:net';
 import helmet from 'helmet';
-import { rateLimit } from 'express-rate-limit';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { authenticate, authRouter } from './auth.js';
 import { AppError, errorHandler } from './errors.js';
 import { inventoryRouter, vehicleRouter } from './vehicles/routes.js';
@@ -11,9 +12,15 @@ export interface AppOptions {
   db: DatabaseSync;
   jwtSecret: string;
   authRateLimit?: number;
+  clientIpSource?: 'socket' | 'railway';
 }
 
-export function createApp({ db, jwtSecret, authRateLimit = 30 }: AppOptions) {
+export function createApp({
+  db,
+  jwtSecret,
+  authRateLimit = 30,
+  clientIpSource = 'socket',
+}: AppOptions) {
   const app = express();
   app.disable('x-powered-by');
   app.use(helmet());
@@ -31,6 +38,12 @@ export function createApp({ db, jwtSecret, authRateLimit = 30 }: AppOptions) {
     rateLimit({
       windowMs: 15 * 60 * 1000,
       limit: authRateLimit,
+      keyGenerator: (req) => {
+        // Enable only behind Railway's HTTP edge, which supplies the client IP.
+        const edgeIp = req.get('X-Real-IP');
+        const clientIp = clientIpSource === 'railway' && edgeIp && isIP(edgeIp) ? edgeIp : req.ip;
+        return ipKeyGenerator(clientIp ?? req.socket.remoteAddress ?? 'unknown');
+      },
       standardHeaders: 'draft-8',
       legacyHeaders: false,
       skip: (req) => req.method !== 'POST',

@@ -7,7 +7,11 @@ import { loadConfig } from './config.js';
 
 const config = loadConfig();
 const db = openDatabase(config.DATABASE_PATH);
-const app = createApp({ db, jwtSecret: config.JWT_SECRET });
+const app = createApp({
+  db,
+  jwtSecret: config.JWT_SECRET,
+  clientIpSource: config.CLIENT_IP_SOURCE,
+});
 const clientDir = resolve('dist/client');
 if (existsSync(clientDir)) {
   app.use(express.static(clientDir));

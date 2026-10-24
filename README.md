@@ -108,6 +108,8 @@ The container recipe is supplied for convenience; see the test report for whethe
 
 ## Scope and limitations
 
+For a hosted deployment with persistent SQLite storage, see [the Railway deployment guide](docs/DEPLOYMENT.md). The repository includes `railway.json` with a health check and a demo startup command; a Railway account connection and volume are required before publishing.
+
 This is a toy inventory system. A purchase updates inventory; it does not process payments, create an order, or collect personal buyer details. Duplicate submissions are prevented while the confirmation dialog is busy, but network retries have no idempotency key. The app refreshes after its own mutations; it has no live push updates across clients.
 
 SQLite and synchronous queries suit a small, single-instance app. The in-process rate limiter, global summaries and substring search are deliberate small-scale choices. For multiple API instances, use a server database, a shared rate-limit store and an indexed search strategy. There is no password reset, email verification, refresh/revocation system, or full catalogue-edit audit. Tokens live in session storage for this demo; production auth would need a considered cookie/session strategy, HTTPS and stricter deployment controls.
@@ -126,7 +128,7 @@ Screenshots are captured from the working app by the browser suite.
 
 **Tool used:** OpenAI Codex in the desktop app.
 
-Codex read the supplied kata, proposed the architecture, wrote the initial failing backend tests, implemented the API/database layers, built the React/Tailwind interface, added browser tests, debugged the form-label and browser-test locator issues, and prepared the documentation and local verification commands. The implementation in this repository was produced with substantial AI assistance, not just autocomplete. AI-assisted commits include a `Co-authored-by: Codex <AI@users.noreply.github.com>` trailer.
+Codex read the supplied kata, proposed the architecture, wrote the initial failing backend tests, implemented the API/database layers, built the React/Tailwind interface, added browser tests, debugged the form-label and browser-test locator issues, and prepared the documentation, hosting configuration and local verification commands. The implementation in this repository was produced with substantial AI assistance, not just autocomplete. AI-assisted commits include a `Co-authored-by: Codex` trailer.
 
 The recorded workflow shows that AI can quickly connect a full-stack implementation, but generated code and tests still need execution and review: browser checks found issues that type checking and API tests did not catch. The red/green commits and captured results make that work inspectable. No claim is made that a human manually authored or independently reviewed code when that has not happened. The submitter should run the app, review the code and add their own honest reflection before discussing it in an interview.
 
