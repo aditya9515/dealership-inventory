@@ -1,0 +1,106 @@
+Verification run: 2026-10-24T20:21:08.005Z
+Node: v24.22.1
+
+
+Formatting
+$ node node_modules/prettier/bin/prettier.cjs --check .
+Checking formatting...
+All matched files use Prettier code style!
+
+
+Backend tests and coverage
+$ node node_modules/vitest/vitest.mjs run --coverage
+
+ RUN  v3.2.7 C:/Users/Aditya/Documents/ChatGPT/toy project
+      Coverage enabled with v8
+
+ ✓ tests/api/config.test.ts (2 tests) 14ms
+ ✓ tests/api/vehicles.test.ts (33 tests) 1043ms
+ ✓ tests/api/auth.test.ts (14 tests) 4699ms
+   ✓ authentication against a real SQLite file > registers a customer, hashes the password, and issues a usable JWT  512ms
+   ✓ authentication against a real SQLite file > normalizes emails and rejects duplicate registration  393ms
+   ✓ authentication against a real SQLite file > logs in with a correct password, but rejects a wrong password or missing account  1361ms
+   ✓ authentication against a real SQLite file > limits repeated authentication attempts  645ms
+   ✓ authentication against a real SQLite file > retains a registered account after the database is reopened  637ms
+   ✓ authentication against a real SQLite file > rejects login passwords over bcrypt’s 72-byte limit  348ms
+   ✓ authentication against a real SQLite file > handles simultaneous registration for the same email without a server error  650ms
+
+ Test Files  3 passed (3)
+      Tests  49 passed (49)
+   Start at  01:51:09
+   Duration  6.07s (transform 156ms, setup 0ms, collect 1.59s, tests 5.76s, environment 1ms, prepare 680ms)
+
+ % Coverage report from v8
+-----------------|---------|----------|---------|---------|-------------------
+File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-----------------|---------|----------|---------|---------|-------------------
+All files        |   99.17 |    94.69 |     100 |   99.17 |                   
+ server          |   98.05 |    94.33 |     100 |   98.05 |                   
+  app.ts         |   95.55 |      100 |     100 |   95.55 | 26-27             
+  auth.ts        |   97.56 |    93.93 |     100 |   97.56 | 91-92             
+  config.ts      |     100 |      100 |     100 |     100 |                   
+  database.ts    |     100 |      100 |     100 |     100 |                   
+  errors.ts      |     100 |       90 |     100 |     100 | 33                
+ server/vehicles |     100 |       95 |     100 |     100 |                   
+  repository.ts  |     100 |    96.15 |     100 |     100 | 83                
+  routes.ts      |     100 |    81.81 |     100 |     100 | 26,36             
+  service.ts     |     100 |      100 |     100 |     100 |                   
+  validation.ts  |     100 |      100 |     100 |     100 |                   
+-----------------|---------|----------|---------|---------|-------------------
+
+
+TypeScript checks
+$ node node_modules/typescript/bin/tsc --noEmit
+
+
+Frontend production build
+$ node node_modules/vite/bin/vite.js build
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 1587 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/index.html                   0.63 kB │ gzip:  0.37 kB
+dist/client/assets/index-DsUogQLu.css   24.57 kB │ gzip:  6.62 kB
+dist/client/assets/index-DiIAA-uq.js   256.21 kB │ gzip: 80.27 kB
+✓ built in 2.48s
+
+
+Backend production build
+$ node node_modules/typescript/bin/tsc -p tsconfig.server.json
+
+
+Browser tests
+$ node node_modules/@playwright/test/cli.js test
+
+Running 5 tests using 1 worker
+
+  ok 1 [chromium] › tests\e2e\showroom.spec.ts:12:1 › desktop and mobile showroom render without browser errors (2.2s)
+  ok 2 [chromium] › tests\e2e\showroom.spec.ts:29:1 › admin can add, edit, restock, purchase and delete a vehicle (3.0s)
+  ok 3 [chromium] › tests\e2e\showroom.spec.ts:81:1 › customer searches, filters and purchases while admin actions stay hidden (2.7s)
+  ok 4 [chromium] › tests\e2e\showroom.spec.ts:108:1 › registration, session restoration and logout work end to end (1.4s)
+  ok 5 [chromium] › tests\e2e\showroom.spec.ts:123:1 › invalid credentials show an actionable error (1.0s)
+
+  5 passed (13.4s)
+[WebServer] (node:18944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:30336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:11804) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+(node:33828) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+Compiled seed command
+$ node dist/server/seed.js
+Demo accounts and inventory are ready. Existing accounts and vehicles were preserved.
+
+
+Production HTTP smoke check: PASS (health, HTML, JS asset, login and protected catalogue).
+
+
+Format generated report
+$ node node_modules/prettier/bin/prettier.cjs --write docs/TEST_REPORT.md docs/coverage-summary.json
+docs/TEST_REPORT.md 26ms
+docs/coverage-summary.json 37ms
