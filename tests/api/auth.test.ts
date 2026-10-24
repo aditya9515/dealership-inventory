@@ -116,4 +116,24 @@ describe('authentication against a real SQLite file', () => {
       .send({ email: credentials.email, password: credentials.password })
       .expect(200);
   });
+
+  it('rejects login passwords over bcrypt’s 72-byte limit', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({ ...credentials, password: 'é'.repeat(36) })
+      .expect(201);
+    await request(app)
+      .post('/api/auth/login')
+      .send({ email: credentials.email, password: 'é'.repeat(36) + 'x' })
+      .expect(400);
+  });
+
+  it('handles simultaneous registration for the same email without a server error', async () => {
+    const results = await Promise.all([
+      request(app).post('/api/auth/register').send(credentials),
+      request(app).post('/api/auth/register').send(credentials),
+    ]);
+    expect(results.map((result) => result.status).sort()).toEqual([201, 409]);
+    expect(db.prepare('SELECT id FROM users').all()).toHaveLength(1);
+  });
 });
