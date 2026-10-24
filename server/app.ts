@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { authenticate, authRouter } from './auth.js';
 import { AppError, errorHandler } from './errors.js';
+import { inventoryRouter, vehicleRouter } from './vehicles/routes.js';
 
 export interface AppOptions {
   db: DatabaseSync;
@@ -30,7 +31,8 @@ export function createApp({ db, jwtSecret, authRateLimit = 30 }: AppOptions) {
     skip: (req) => req.method !== 'POST',
     message: { error: { code: 'RATE_LIMITED', message: 'Too many attempts. Please try again in 15 minutes.' } },
   }), authRouter(db, jwtSecret));
-  app.use('/api/vehicles', authenticate(db, jwtSecret));
+  app.use('/api/vehicles', authenticate(db, jwtSecret), vehicleRouter(db));
+  app.use('/api/inventory', authenticate(db, jwtSecret), inventoryRouter(db));
   app.use('/api', () => { throw new AppError(404, 'NOT_FOUND', 'This API route does not exist.'); });
   app.use(errorHandler);
   return app;
